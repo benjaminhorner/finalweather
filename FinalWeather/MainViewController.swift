@@ -27,6 +27,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     // Data sources
     var hourlyForecast: [WeatherModel] = []
     var weeklyForecast: [WeatherModel] = []
+    
+    
+    // To track scrolling behaviour
+    var lastContentOffset: CGFloat = 0
 
     
     // UI elements
@@ -131,7 +135,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             return setCellUI(cell, data: data, section: indexPath.section)
         }
         else {
-            let cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            let cell = SWTableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
             return setCellUI(cell, data: data, section: indexPath.section)
         }
         
@@ -336,6 +340,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             else {
                 cell.textLabel?.attributedText = Typography.locationLabelTypography().string("Prochains jours")
             }
+            
+            cell.detailTextLabel?.attributedText = nil
+            cell.imageView?.image = nil
+            
             return cell
         }
         
@@ -375,7 +383,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         if let icon = data?.icon {
             cell.imageView?.image = UIImage(named: icon)
-            cell.imageView?.contentMode = .scaleAspectFit
             cell.imageView?.image? = (cell.imageView?.image?.withRenderingMode(.alwaysTemplate))!
             cell.imageView?.tintColor = GeneralStylesheet.Colours().iconColour
         }
@@ -571,8 +578,33 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     /////////////////////////////////////////////////////////////
     
     // MARK: ScrollView delegate
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        <#code#>
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        let offsetY = scrollView.contentOffset.y
+        
+        if (lastContentOffset > offsetY) || offsetY > UIScreen.main.bounds.height {
+            tableView.isPagingEnabled = offsetY < view.frame.height-20
+        }
+        
+        // animate blurview opacity
+        let totalScroll = scrollView.contentSize.height - scrollView.bounds.size.height
+        
+        /* This is the percentage of the current offset / bottom offset. */
+        let percentage = offsetY / totalScroll
+        
+        /* When percentage = 0, the alpha should be 1 so we should flip the percentage. */
+        let alpha = 0 + percentage
+        
+        // prevent alpha from being less than
+        tableView.backgroundView?.alpha = alpha
+    }
+    
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        
+        let offsetY = scrollView.contentOffset.y
+        tableView.isPagingEnabled = offsetY < view.frame.height-20
+
     }
 }
 
