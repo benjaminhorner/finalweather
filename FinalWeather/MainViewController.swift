@@ -582,9 +582,11 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         let offsetY = scrollView.contentOffset.y
         
-        if (lastContentOffset > offsetY) || offsetY > UIScreen.main.bounds.height {
-            tableView.isPagingEnabled = offsetY < view.frame.height-20
-        }
+        log.debug("lastContentOffset > offsetY = \(lastContentOffset > offsetY)")
+        log.debug("offsetY > UIScreen.main.bounds.height = \(offsetY > UIScreen.main.bounds.height)")
+        log.debug("offsetY < UIScreen.main.bounds.height-20 = \(offsetY < UIScreen.main.bounds.height-20)")
+        
+        tableView.isPagingEnabled = offsetY < UIScreen.main.bounds.height-20
         
         // animate blurview opacity
         let totalScroll = scrollView.contentSize.height - scrollView.bounds.size.height
@@ -598,13 +600,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // prevent alpha from being less than
         tableView.backgroundView?.alpha = alpha
     }
-    
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        
-        let offsetY = scrollView.contentOffset.y
-        tableView.isPagingEnabled = offsetY < view.frame.height-20
 
-    }
 }
 
