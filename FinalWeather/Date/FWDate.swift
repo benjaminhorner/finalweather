@@ -33,4 +33,29 @@ class FWDate: NSObject {
         
     }
     
+    
+    // Given a Date
+    // return a Localized String for the day
+    class func stringDayFromDate(_ date: Date) -> String? {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM"
+        let dateString = dateFormatter.string(from: date)
+        
+        return dateString.capitalized
+        
+    }
+    
+    // Given a Date
+    // return a Localized String for the hour
+    class func stringHourFromDate(_ date: Date) -> String? {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH"
+        let dateString = dateFormatter.string(from: date)
+        
+        return "\(dateString.capitalized)h"
+        
+    }
+    
 }

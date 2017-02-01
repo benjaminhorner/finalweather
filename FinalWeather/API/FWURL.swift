@@ -28,7 +28,7 @@ class FWURL: NSObject {
     }
     
     class func hourlyForecastURL() -> String {
-        return "\(kRootURL)\(kHourlyForecastURL)?q=\(kLocation)&units=\(kMetrics)&appid=\(kAPIKey)"
+        return "\(kRootURL)\(kHourlyForecastURL)?q=\(kLocation)&cnt=12&units=\(kMetrics)&appid=\(kAPIKey)"
     }
 
 
