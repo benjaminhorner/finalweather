@@ -281,7 +281,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./Fabric.framework/run 12d19ce9b423bc91782ce1666667dbe537fcd098 beb36d1cd2a3b482b787c2d61c4f5a65d7ed7cae521948d82d70c1d45b169589";
+			shellScript = "./Fabric.framework/run 882ed36b4e6500bbd9e08e00687d7d6695aea37d 2bf069d97af3a4c68a66d1669e8fba1af87b631bbc9846c06d4bb941bca6aed1\n";
 		};
 		2D82657C8B1103AAC26057F7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -461,6 +461,7 @@
 			baseConfigurationReference = DC3690EC43011E3A71243E78 /* Pods-FinalWeather.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 3T6H8V36W5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -479,6 +480,7 @@
 			baseConfigurationReference = 0A17CCD0FAA8D00F13C45009 /* Pods-FinalWeather.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 3T6H8V36W5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
