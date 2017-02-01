@@ -52,6 +52,9 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Set the UI as soon as the View controller is loaded
         setUI()
         
+        // Retrieve the data from the API
+        getData()
+        
     }
     
     
@@ -306,6 +309,22 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     /////////////////////////////////////////////////////////////
     
     // MARK: Data
+    fileprivate func getData() {
+        
+        API.getCurrentWeather { (model, success) in
+            
+            if success {
+                log.info("Retrieved data")
+            }
+            else {
+                log.error("Failed to retrieve data")
+            }
+            
+        }
+        
+    }
+    
+    
     fileprivate func setData() {
         
         
@@ -330,6 +349,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     
+    
+    /////////////////////////////////////////////////////////////
+    
+    // MARK: Orientation change
     @objc fileprivate func didRotateToOrientation() {
         
         tableView.frame = HomeStylesheet.TodayComponent.Header().frame
