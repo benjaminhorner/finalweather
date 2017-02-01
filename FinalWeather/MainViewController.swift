@@ -130,6 +130,8 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         let blur = UIBlurEffect(style: UIBlurEffectStyle.dark)
         let blurView = UIVisualEffectView(effect: blur)
         tableView.backgroundView = blurView
+        tableView.backgroundView?.alpha = 0
+        backgroundImageView.alpha = 0.6
         
         
         // Set the UI Styles once the UI is in place
