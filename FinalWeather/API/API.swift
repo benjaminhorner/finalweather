@@ -9,7 +9,7 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
-//import SwiftyUserDefaults
+import SwiftyUserDefaults
 
 class API: NSObject {
     
@@ -38,6 +38,13 @@ class API: NSObject {
                 log.debug("JSON response: \(json)")
                 
                 let model = API.mapCurrentWeatherJSON(json)
+                
+                // If the model is set
+                // Store it in cache for next time
+                if let m = model {
+                    let data = NSKeyedArchiver.archivedData(withRootObject: m)
+                    Defaults[.latestWeather] = data
+                }
                 
                 completionHandler(model, true)
                 

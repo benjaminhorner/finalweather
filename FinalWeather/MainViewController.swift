@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import SwiftyUserDefaults
 
 
 
@@ -15,6 +16,12 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // Cell identifier
     let CellIdentifier: String = "CellIdentifier"
+    
+    
+    // This flag is used to call for new Data
+    // If this hasn't already been done
+    // When the network is reachable
+    var hasUpdatedData: Bool = false
 
     
     // UI elements
@@ -52,8 +59,15 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Set the UI as soon as the View controller is loaded
         setUI()
         
-        // Retrieve the data from the API
-        getData()
+        // Set the Data from cache if it exists
+        if let cachedWeather = Defaults[.latestWeather] as? Data {
+            let model = NSKeyedUnarchiver.unarchiveObject(with: cachedWeather) as? WeatherModel
+            setCurrentWeatherData(model)
+        }
+        // Or set the default values
+        else {
+            setCurrentWeatherData(nil)
+        }
         
     }
     
@@ -291,9 +305,19 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // MARK: Network status change
     func reachabilityStatusChanged(notification: NSNotification) {
+        
+        // Ignore if the Data has already been updated
+        guard !hasUpdatedData
+            else {
+                return
+        }
+        
         if let info = notification.userInfo {
             if let s = info[SSAReachabilityNotificationStatusItem] {
                 if let reachabilityStatus = (s as AnyObject).description {
+                    if reachabilityStatus == "reachable" {
+                        getCurrentWeatherData()
+                    }
                     log.info("reachabilityStatus \(reachabilityStatus)")
                 }
             }
@@ -302,17 +326,20 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     
+    
+    
     /////////////////////////////////////////////////////////////
     
     // MARK: Data
-    fileprivate func getData() {
+    fileprivate func getCurrentWeatherData() {
         
         API.getCurrentWeather { (model, success) in
             
             if success && model != nil {
                 log.info("Retrieved data")
                 
-                self.setData(model)
+                self.setCurrentWeatherData(model)
+                self.hasUpdatedData = true
                 
             }
             else {
@@ -324,26 +351,39 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     
-    fileprivate func setData(_ model: WeatherModel?) {
+    fileprivate func setCurrentWeatherData(_ model: WeatherModel?) {
         
        
         if let date = model?.date {
             if let dateString = FWDate.stringFromDate(date) {
                 dateLabel.attributedText = Typography.dateLabelTypography().string(dateString)
             }
-            
+        }
+        else {
+            if let dateString = FWDate.stringFromDate(Date()) {
+                dateLabel.attributedText = Typography.dateLabelTypography().string(dateString)
+            }
         }
         
         if let location = model?.location {
             locationLabel.attributedText = Typography.locationLabelTypography().string(location)
         }
+        else {
+            locationLabel.attributedText = Typography.locationLabelTypography().string("- -")
+        }
         
         if let speed = model?.windSpeed {
             currentWindLabel.attributedText = Typography.dateLabelTypography().string("\(String(speed))km/h")
         }
+        else {
+            currentWindLabel.attributedText = Typography.dateLabelTypography().string("- km/h")
+        }
         
         if let humidity = model?.humidity {
             currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("\(String(humidity))%")
+        }
+        else {
+            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("- %")
         }
         
         if let temperature = model?.temperature {
@@ -351,6 +391,9 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             let temperatureRound = tempToString(temperature)
             temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("\(temperatureRound)°")
             
+        }
+        else {
+            temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("0°")
         }
         
         if let tempMin = model?.tempMin {
@@ -361,6 +404,9 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
                 minMaxTemperature.attributedText = Typography.dateLabelTypography().string("\(tempMaxRound)°/\(tempMinRound)°")
                 
             }
+        }
+        else {
+            minMaxTemperature.attributedText = Typography.dateLabelTypography().string("- °/- °")
         }
             
             
