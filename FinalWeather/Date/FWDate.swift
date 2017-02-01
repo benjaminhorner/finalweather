@@ -39,7 +39,7 @@ class FWDate: NSObject {
     class func stringDayFromDate(_ date: Date) -> String? {
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMMM"
+        dateFormatter.dateFormat = "EEEE"
         let dateString = dateFormatter.string(from: date)
         
         return dateString.capitalized

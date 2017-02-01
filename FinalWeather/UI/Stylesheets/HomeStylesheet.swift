@@ -32,6 +32,7 @@ class HomeStylesheet: GeneralStylesheet {
         
         struct TableView {
             
+            let frame = CGRect(x: UIScreen.main.bounds.origin.x, y: 20, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-20)
             struct Cells {
                 let backgroundColour = UIColor.clear
             }

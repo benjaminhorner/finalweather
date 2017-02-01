@@ -135,6 +135,74 @@ class API: NSObject {
     }
     
     
+    class func mapWeeklyJSON(index: Int, list: [SwiftyJSON.JSON]) -> WeatherModel? {
+        
+        var model: WeatherModel?
+        
+        
+        /*
+         
+         {
+         "dt" : 1485946800,
+         "weather" : [
+         {
+         "id" : 800,
+         "description" : "clear sky",
+         "main" : "Clear",
+         "icon" : "02d"
+         }
+         ],
+         "pressure" : 990.58,
+         "speed" : 3.62,
+         "deg" : 169,
+         "clouds" : 8,
+         "humidity" : 94,
+         "temp" : {
+         "eve" : 8.35,
+         "min" : 7.42,
+         "morn" : 12,
+         "day" : 12,
+         "max" : 12,
+         "night" : 7.48
+         }
+         }
+         
+         */
+        
+        guard let main = list[index].dictionary
+            else {
+                
+                log.warning("The list was not a dictionary")
+                return nil
+        }
+        
+        if let temp = main["temp"]?.dictionary {
+            model = WeatherModel(temperature: nil)
+            if let min = temp["min"]?.float {
+                model?.tempMin = min
+            }
+            
+            if let max = temp["max"]?.float {
+                model?.tempMax = max
+            }
+            
+        }
+        
+        if let weather = main["weather"]?.array {
+            if let icon = weather[0]["icon"].string {
+                model?.icon = icon
+            }
+        }
+        
+        if let dt = main["dt"]?.int {
+            model?.date = FWDate.timesTampToDate(dt)
+        }
+        
+        return model
+        
+    }
+    
+    
     class func mapCurrentWeatherJSON(_ json: SwiftyJSON.JSON) -> WeatherModel? {
         
         
@@ -268,7 +336,7 @@ class API: NSObject {
         // loop through the list
         // And add the models to the models array
         for index in 0..<list.count {
-            if let model = API.mapWeatherJSON(index: index, list: list) {
+            if let model = API.mapWeeklyJSON(index: index, list: list) {
                 models.append(model)
             }
         }
