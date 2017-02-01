@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeatherModel: NSObject {
+class WeatherModel: NSObject, NSCoding {
 
 
     // Typical JSON response format
@@ -32,27 +32,29 @@ class WeatherModel: NSObject {
     
     
     // Model structure
-    var temperature: CGFloat?
-    var tempMin: CGFloat?
-    var tempMax: CGFloat?
+    var temperature: Float?
+    var tempMin: Float?
+    var tempMax: Float?
     var humidity: Int?
-    var windSpeed: CGFloat?
+    var windSpeed: Float?
     var weatherDescription: String?
     var icon: String?
     var date: Date?
+    var location: String?
     
     
     
     // MARK: NSCoding
     required init(coder aDecoder: NSCoder) {
-        self.temperature = aDecoder.decodeObject(forKey: "temperature") as? CGFloat
-        self.tempMin = aDecoder.decodeObject(forKey: "tempMin") as? CGFloat
-        self.tempMax = aDecoder.decodeObject(forKey: "tempMax") as? CGFloat
+        self.temperature = aDecoder.decodeObject(forKey: "temperature") as? Float
+        self.tempMin = aDecoder.decodeObject(forKey: "tempMin") as? Float
+        self.tempMax = aDecoder.decodeObject(forKey: "tempMax") as? Float
         self.humidity = aDecoder.decodeObject(forKey: "humidity") as? Int
-        self.windSpeed = aDecoder.decodeObject(forKey: "windSpeed") as? CGFloat
+        self.windSpeed = aDecoder.decodeObject(forKey: "windSpeed") as? Float
         self.weatherDescription = aDecoder.decodeObject(forKey: "weatherDescription") as? String
         self.icon = aDecoder.decodeObject(forKey: "icon") as? String
         self.date = aDecoder.decodeObject(forKey: "date") as? Date
+        self.location = aDecoder.decodeObject(forKey: "location") as? String
         
     }
     
@@ -65,6 +67,7 @@ class WeatherModel: NSObject {
         aCoder.encode(weatherDescription, forKey: "weatherDescription")
         aCoder.encode(icon, forKey: "icon")
         aCoder.encode(date, forKey: "date")
+        aCoder.encode(location, forKey: "location")
     }
     
     
@@ -72,17 +75,10 @@ class WeatherModel: NSObject {
      * @discussion Model initializer
      */
     
-    init(temperature: CGFloat?, tempMin: CGFloat?, tempMax: CGFloat?, humidity: Int?, windSpeed: CGFloat?, weatherDescription: String?, icon: String?, date: Date?) {
+    init(temperature: Float?) {
         
         // Set the values
         self.temperature = temperature
-        self.tempMin = tempMin
-        self.tempMax = tempMax
-        self.humidity = humidity
-        self.windSpeed = windSpeed
-        self.weatherDescription = weatherDescription
-        self.icon = icon
-        self.date = date
         
         super.init()
         

@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import SwiftyUserDefaults
 
 
 
@@ -15,12 +16,23 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // Cell identifier
     let CellIdentifier: String = "CellIdentifier"
+    
+    
+    // This flag is used to call for new Data
+    // If this hasn't already been done
+    // When the network is reachable
+    var hasUpdatedData: Bool = false
+    
+    
+    // Data sources
+    var hourlyForecast: [WeatherModel] = []
+    var weeklyForecast: [WeatherModel] = []
 
     
     // UI elements
     let header = UIView()
     let backgroundImageView = UIImageView()
-    let tableView = UITableView()
+    var tableView: UITableView!
     let dateLabel = UILabel()
     let locationLabel = UILabel()
     let currentWindLabel = UILabel()
@@ -52,6 +64,21 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Set the UI as soon as the View controller is loaded
         setUI()
         
+        // Set the Data from cache if it exists
+        if let cachedWeather = Defaults[.latestWeather] as? Data {
+            let model = NSKeyedUnarchiver.unarchiveObject(with: cachedWeather) as? WeatherModel
+            setCurrentWeatherData(model)
+        }
+        // Or set the default values
+        else {
+            setCurrentWeatherData(nil)
+        }
+        
+        
+        // Fetch the hourly and weekly forecast
+        getHourlyForecastData()
+        getWeeklyForecastData()
+        
     }
     
     
@@ -64,20 +91,49 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        
+        // if the section is the hourly forecast section
+        // count the hourly forecast array data
+        if section == 0 {
+            let total = hourlyForecast.count
+            if total > 0 {
+                return total + 1
+            }
+            return total
+        }
+        // Else it is the weekly forecast
+        // so return the weekly forecast array count
+        else {
+            let total = weeklyForecast.count
+            if total > 0 {
+                return total + 1
+            }
+            return total
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        var data: WeatherModel?
+        
+        // If the section is the hourly forecast
+        // Get data from that array
+        if indexPath.section == 0 && indexPath.row > 0 {
+            data = hourlyForecast[indexPath.row-1]
+        }
+        // Get the data from the weekly forecast array
+        else if indexPath.row > 0 {
+            data = weeklyForecast[indexPath.row-1]
+        }
+        
         if let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier) {
-            return setCellUI(cell)
+            return setCellUI(cell, data: data, section: indexPath.section)
         }
         else {
             let cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
-            return setCellUI(cell)
+            return setCellUI(cell, data: data, section: indexPath.section)
         }
-        
-        
         
     }
     
@@ -108,6 +164,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         
         // Set the tableview that will hold all the data
+        tableView = UITableView(frame: CGRect.zero, style: UITableViewStyle.grouped)
         tableView.backgroundColor = GeneralStylesheet.Colours().tableViewBackground
         tableView.delegate = self
         tableView.dataSource = self
@@ -136,10 +193,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         // Set the UI Styles once the UI is in place
         setUIStyles()
-        
-        
-        // TODO: Remove
-        setData()
         
     }
     
@@ -202,10 +255,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         
         // Change values depending on orientation
-        var dateLabelTop: CGFloat = 40
+        var dateLabelTop: CGFloat = 20
         
         if UIDeviceOrientationIsLandscape(UIDevice.current.orientation) {
-            dateLabelTop = 20
+            dateLabelTop = 0
         }
         
         
@@ -271,12 +324,62 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     // Set Cell UI
-    fileprivate func setCellUI(_ cell: UITableViewCell) -> UITableViewCell {
+    fileprivate func setCellUI(_ cell: UITableViewCell, data: WeatherModel?, section: Int) -> UITableViewCell {
         
         cell.backgroundColor = HomeStylesheet.TodayComponent.TableView.Cells().backgroundColour
         cell.selectionStyle = .none
-        cell.textLabel?.textColor = UIColor.blue
-        cell.detailTextLabel?.textColor = UIColor.orange
+        
+        if data == nil {
+            if section == 0 {
+                cell.textLabel?.attributedText = Typography.locationLabelTypography().string("Prochaines heures")
+            }
+            else {
+                cell.textLabel?.attributedText = Typography.locationLabelTypography().string("Prochains jours")
+            }
+            return cell
+        }
+        
+        if let date = data?.date {
+            
+            var string = FWDate.stringDayFromDate(date)
+            
+            if section == 0 {
+                string = FWDate.stringHourFromDate(date)
+            }
+            
+            if let str = string {
+                cell.textLabel?.attributedText = Typography.dateLabelTypography().string(str)
+            }
+            
+        }
+        
+        if section == 0 {
+            if let temp = data?.temperature {
+                let tempString = tempToString(temp)
+                cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(tempString)°")
+            }
+        }
+        else {
+            if let minTemp = data?.tempMin {
+                
+                if let maxTemp = data?.tempMax {
+                    let minTempString = tempToString(minTemp)
+                    let maxTempString = tempToString(maxTemp)
+                    cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(maxTempString)°/\(minTempString)°")
+
+                }
+                
+            }
+        }
+        
+        
+        if let icon = data?.icon {
+            cell.imageView?.image = UIImage(named: icon)
+            cell.imageView?.contentMode = .scaleAspectFit
+            cell.imageView?.image? = (cell.imageView?.image?.withRenderingMode(.alwaysTemplate))!
+            cell.imageView?.tintColor = GeneralStylesheet.Colours().iconColour
+        }
+        
         
         return cell
         
@@ -292,9 +395,19 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     // MARK: Network status change
     func reachabilityStatusChanged(notification: NSNotification) {
+        
+        // Ignore if the Data has already been updated
+        guard !hasUpdatedData
+            else {
+                return
+        }
+        
         if let info = notification.userInfo {
             if let s = info[SSAReachabilityNotificationStatusItem] {
                 if let reachabilityStatus = (s as AnyObject).description {
+                    if reachabilityStatus == "reachable" {
+                        getCurrentWeatherData()
+                    }
                     log.info("reachabilityStatus \(reachabilityStatus)")
                 }
             }
@@ -303,40 +416,163 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     
+    
+    
     /////////////////////////////////////////////////////////////
     
     // MARK: Data
-    fileprivate func setData() {
+    fileprivate func getCurrentWeatherData() {
         
+        API.getCurrentWeather { (model, success) in
+            
+            if success && model != nil {
+                log.info("Retrieved data")
+                
+                self.setCurrentWeatherData(model)
+                self.hasUpdatedData = true
+                
+            }
+            else {
+                log.error("Failed to retrieve data")
+            }
+            
+        }
         
-        dateLabel.attributedText = Typography.dateLabelTypography().string("Wednesday, February 1")
-        locationLabel.attributedText = Typography.locationLabelTypography().string("Lyon")
+    }
+    
+    
+    fileprivate func getHourlyForecastData() {
         
-        currentWindLabel.attributedText = Typography.dateLabelTypography().string("30km/h")
-        currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("80%")
+        API.getHourlyForecast { (models, success) in
+            if success {
+                
+                log.info("Retrieved data for hourly forecast")
+                
+                self.hourlyForecast = models
+                self.tableView.reloadSections(IndexSet(integer: 0), with: UITableViewRowAnimation.none)
+                
+            }
+            else {
+                log.error("Failed to retrieve data for hourly forecast")
+            }
+        }
         
-        temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("12°")
+    }
+    
+    
+    fileprivate func getWeeklyForecastData() {
         
-        minMaxTemperature.attributedText = Typography.dateLabelTypography().string("14°/11°")
+        API.getWeeklyForecast { (models, success) in
+            if success {
+                log.info("Retrieved data for weekly forecast")
+                
+                self.weeklyForecast = models
+                self.tableView.reloadSections(IndexSet(integer: 1), with: UITableViewRowAnimation.none)
+                
+            }
+            else {
+                log.error("Failed to retrieve data for weekly forecast")
+            }
+        }
+        
+    }
+    
+    
+    fileprivate func setCurrentWeatherData(_ model: WeatherModel?) {
+        
+       
+        if let date = model?.date {
+            if let dateString = FWDate.stringFromDate(date) {
+                dateLabel.attributedText = Typography.dateLabelTypography().string(dateString)
+            }
+        }
+        else {
+            if let dateString = FWDate.stringFromDate(Date()) {
+                dateLabel.attributedText = Typography.dateLabelTypography().string(dateString)
+            }
+        }
+        
+        if let location = model?.location {
+            locationLabel.attributedText = Typography.locationLabelTypography().string(location)
+        }
+        else {
+            locationLabel.attributedText = Typography.locationLabelTypography().string("- -")
+        }
+        
+        if let speed = model?.windSpeed {
+            currentWindLabel.attributedText = Typography.dateLabelTypography().string("\(String(speed))km/h")
+        }
+        else {
+            currentWindLabel.attributedText = Typography.dateLabelTypography().string("0km/h")
+        }
+        
+        if let humidity = model?.humidity {
+            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("\(String(humidity))%")
+        }
+        else {
+            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("0%")
+        }
+        
+        if let temperature = model?.temperature {
+            
+            let temperatureRound = tempToString(temperature)
+            temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("\(temperatureRound)°")
+            
+        }
+        else {
+            temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("0°")
+        }
+        
+        if let tempMin = model?.tempMin {
+            if let tempMax = model?.tempMax {
+                
+                let tempMinRound = tempToString(tempMin)
+                let tempMaxRound = tempToString(tempMax)
+                minMaxTemperature.attributedText = Typography.dateLabelTypography().string("\(tempMaxRound)°/\(tempMinRound)°")
+                
+            }
+        }
+        else {
+            minMaxTemperature.attributedText = Typography.dateLabelTypography().string("0°/0°")
+        }
             
             
         // Set weather icon
-        currentWeatherIcon.image = UIImage(named: "01d")
+        if let icon = model?.icon {
+            currentWeatherIcon.image = UIImage(named: icon)
+        }
         currentWeatherIcon.image? = (currentWeatherIcon.image?.withRenderingMode(.alwaysTemplate))!
         currentWeatherIcon.tintColor = GeneralStylesheet.Colours().iconColour
         
     }
     
     
+    // Set temperature to String
+    fileprivate func tempToString(_ temp: Float) -> String {
+        return String(Int(round(temp)))
+    }
     
     
+    
+    /////////////////////////////////////////////////////////////
+    
+    // MARK: Orientation change
     @objc fileprivate func didRotateToOrientation() {
         
-        tableView.frame = HomeStylesheet.TodayComponent.Header().frame
+        tableView.frame = HomeStylesheet.TodayComponent.TableView().frame
         header.frame = HomeStylesheet.TodayComponent.Header().frame
         tableView.tableHeaderView = header
         setConstraints()
     }
+    
+    
+    
 
+    /////////////////////////////////////////////////////////////
+    
+    // MARK: ScrollView delegate
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        <#code#>
+    }
 }
 
