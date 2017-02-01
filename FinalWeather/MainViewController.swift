@@ -32,7 +32,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     // UI elements
     let header = UIView()
     let backgroundImageView = UIImageView()
-    let tableView = UITableView()
+    var tableView: UITableView!
     let dateLabel = UILabel()
     let locationLabel = UILabel()
     let currentWindLabel = UILabel()
@@ -95,28 +95,36 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // if the section is the hourly forecast section
         // count the hourly forecast array data
         if section == 0 {
-            return hourlyForecast.count
+            let total = hourlyForecast.count
+            if total > 0 {
+                return total + 1
+            }
+            return total
         }
         // Else it is the weekly forecast
         // so return the weekly forecast array count
         else {
-            return weeklyForecast.count
+            let total = weeklyForecast.count
+            if total > 0 {
+                return total + 1
+            }
+            return total
         }
         
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        var data: WeatherModel!
+        var data: WeatherModel?
         
         // If the section is the hourly forecast
         // Get data from that array
-        if indexPath.section == 0 {
-            data = hourlyForecast[indexPath.row]
+        if indexPath.section == 0 && indexPath.row > 0 {
+            data = hourlyForecast[indexPath.row-1]
         }
         // Get the data from the weekly forecast array
-        else {
-            data = weeklyForecast[indexPath.row]
+        else if indexPath.row > 0 {
+            data = weeklyForecast[indexPath.row-1]
         }
         
         if let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier) {
@@ -126,8 +134,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             let cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
             return setCellUI(cell, data: data, section: indexPath.section)
         }
-        
-        
         
     }
     
@@ -158,6 +164,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         
         // Set the tableview that will hold all the data
+        tableView = UITableView(frame: CGRect.zero, style: UITableViewStyle.grouped)
         tableView.backgroundColor = GeneralStylesheet.Colours().tableViewBackground
         tableView.delegate = self
         tableView.dataSource = self
@@ -248,10 +255,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         
         // Change values depending on orientation
-        var dateLabelTop: CGFloat = 40
+        var dateLabelTop: CGFloat = 20
         
         if UIDeviceOrientationIsLandscape(UIDevice.current.orientation) {
-            dateLabelTop = 20
+            dateLabelTop = 0
         }
         
         
@@ -317,12 +324,22 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     // Set Cell UI
-    fileprivate func setCellUI(_ cell: UITableViewCell, data: WeatherModel, section: Int) -> UITableViewCell {
+    fileprivate func setCellUI(_ cell: UITableViewCell, data: WeatherModel?, section: Int) -> UITableViewCell {
         
         cell.backgroundColor = HomeStylesheet.TodayComponent.TableView.Cells().backgroundColour
         cell.selectionStyle = .none
         
-        if let date = data.date {
+        if data == nil {
+            if section == 0 {
+                cell.textLabel?.attributedText = Typography.locationLabelTypography().string("Prochaines heures")
+            }
+            else {
+                cell.textLabel?.attributedText = Typography.locationLabelTypography().string("Prochains jours")
+            }
+            return cell
+        }
+        
+        if let date = data?.date {
             
             var string = FWDate.stringDayFromDate(date)
             
@@ -337,15 +354,15 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         
         if section == 0 {
-            if let temp = data.temperature {
+            if let temp = data?.temperature {
                 let tempString = tempToString(temp)
                 cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(tempString)°")
             }
         }
         else {
-            if let minTemp = data.tempMin {
+            if let minTemp = data?.tempMin {
                 
-                if let maxTemp = data.tempMax {
+                if let maxTemp = data?.tempMax {
                     let minTempString = tempToString(minTemp)
                     let maxTempString = tempToString(maxTemp)
                     cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(maxTempString)°/\(minTempString)°")
@@ -356,10 +373,10 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         
         
-        if let icon = data.icon {
+        if let icon = data?.icon {
             cell.imageView?.image = UIImage(named: icon)
             cell.imageView?.contentMode = .scaleAspectFit
-            cell.imageView?.image? = (currentWeatherIcon.image?.withRenderingMode(.alwaysTemplate))!
+            cell.imageView?.image? = (cell.imageView?.image?.withRenderingMode(.alwaysTemplate))!
             cell.imageView?.tintColor = GeneralStylesheet.Colours().iconColour
         }
         
@@ -542,11 +559,20 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     // MARK: Orientation change
     @objc fileprivate func didRotateToOrientation() {
         
-        tableView.frame = HomeStylesheet.TodayComponent.Header().frame
+        tableView.frame = HomeStylesheet.TodayComponent.TableView().frame
         header.frame = HomeStylesheet.TodayComponent.Header().frame
         tableView.tableHeaderView = header
         setConstraints()
     }
+    
+    
+    
 
+    /////////////////////////////////////////////////////////////
+    
+    // MARK: ScrollView delegate
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        <#code#>
+    }
 }
 
