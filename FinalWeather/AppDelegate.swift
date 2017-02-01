@@ -8,11 +8,16 @@
 
 import UIKit
 import SwiftyBeaver
-//import SwiftyUserDefaults
+import SwiftyUserDefaults
 
 
 // SwiftyBeaver
 let log = SwiftyBeaver.self
+
+// SwiftyUserDefaults
+extension DefaultsKeys {
+    static let latestWeather = DefaultsKey<Any?>("latestWeather")
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

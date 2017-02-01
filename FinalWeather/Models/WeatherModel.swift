@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeatherModel: NSObject {
+class WeatherModel: NSObject, NSCoding {
 
 
     // Typical JSON response format
@@ -67,7 +67,7 @@ class WeatherModel: NSObject {
         aCoder.encode(weatherDescription, forKey: "weatherDescription")
         aCoder.encode(icon, forKey: "icon")
         aCoder.encode(date, forKey: "date")
-        aCoder.encode(date, forKey: "location")
+        aCoder.encode(location, forKey: "location")
     }
     
     
