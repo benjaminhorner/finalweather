@@ -140,10 +140,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Set the UI Styles once the UI is in place
         setUIStyles()
         
-        
-        // TODO: Remove
-        setData()
-        
     }
     
     
@@ -313,8 +309,11 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         
         API.getCurrentWeather { (model, success) in
             
-            if success {
+            if success && model != nil {
                 log.info("Retrieved data")
+                
+                self.setData(model)
+                
             }
             else {
                 log.error("Failed to retrieve data")
@@ -325,28 +324,60 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     
-    fileprivate func setData() {
+    fileprivate func setData(_ model: WeatherModel?) {
         
+       
+        if let date = model?.date {
+            if let dateString = FWDate.stringFromDate(date) {
+                dateLabel.attributedText = Typography.dateLabelTypography().string(dateString)
+            }
+            
+        }
         
-        dateLabel.attributedText = Typography.dateLabelTypography().string("Wednesday, February 1")
-        locationLabel.attributedText = Typography.locationLabelTypography().string("Lyon")
+        if let location = model?.location {
+            locationLabel.attributedText = Typography.locationLabelTypography().string(location)
+        }
         
-        currentWindLabel.attributedText = Typography.dateLabelTypography().string("30km/h")
-        currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("80%")
+        if let speed = model?.windSpeed {
+            currentWindLabel.attributedText = Typography.dateLabelTypography().string("\(String(speed))km/h")
+        }
         
-        temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("12°")
+        if let humidity = model?.humidity {
+            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("\(String(humidity))%")
+        }
         
-        minMaxTemperature.attributedText = Typography.dateLabelTypography().string("14°/11°")
+        if let temperature = model?.temperature {
+            
+            let temperatureRound = tempToString(temperature)
+            temperatureLabel.attributedText = Typography.currentTemperatureLabelTypography().string("\(temperatureRound)°")
+            
+        }
+        
+        if let tempMin = model?.tempMin {
+            if let tempMax = model?.tempMax {
+                
+                let tempMinRound = tempToString(tempMin)
+                let tempMaxRound = tempToString(tempMax)
+                minMaxTemperature.attributedText = Typography.dateLabelTypography().string("\(tempMaxRound)°/\(tempMinRound)°")
+                
+            }
+        }
             
             
         // Set weather icon
-        currentWeatherIcon.image = UIImage(named: "01d")
+        if let icon = model?.icon {
+            currentWeatherIcon.image = UIImage(named: icon)
+        }
         currentWeatherIcon.image? = (currentWeatherIcon.image?.withRenderingMode(.alwaysTemplate))!
         currentWeatherIcon.tintColor = GeneralStylesheet.Colours().iconColour
         
     }
     
     
+    // Set temperature to String
+    fileprivate func tempToString(_ temp: Float) -> String {
+        return String(Int(round(temp)))
+    }
     
     
     
