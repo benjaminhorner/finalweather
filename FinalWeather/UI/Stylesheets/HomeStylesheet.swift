@@ -19,9 +19,25 @@ class HomeStylesheet: GeneralStylesheet {
 //    - wind, humidity, rain risk
  
     struct TodayComponent {
+        
+        struct Global {
+            let backgroundImage = "vue-lyon-matin"
+        }
+        
         struct Header {
             let frame = UIScreen.main.bounds
+            let windIcon = UIImage(named: "wind")
+            let humidityIcon = UIImage(named: "humidity")
         }
+        
+        struct TableView {
+            
+            struct Cells {
+                let backgroundColour = UIColor.clear
+            }
+            
+        }
+        
     }
 
 }

@@ -15,11 +15,14 @@ class Typography: NSObject {
     static let smallFontName           = "Avenir-Roman"
     static let smallFontSize: CGFloat  = 12
     
-    static let mediumFontName          = "Avenir-Black"
+    static let mediumFontName          = "Avenir-Medium"
     static let mediumFontSize: CGFloat = 16
     
-    static let largeFontName           = "Avenir-Roman"
+    static let largeFontName           = "Avenir-Light"
     static let largeFontSize: CGFloat  = 72
+    
+    static let veryLargeFontName           = "Avenir-Light"
+    static let veryLargeFontSize: CGFloat  = 130
 
     
     
@@ -33,10 +36,13 @@ class Typography: NSObject {
     // MARK: Large Font
     static let largeFont: UIFont = UIFont(name: largeFontName, size: largeFontSize)!
     
+    // MARK: Very Large Font
+    static let veryLargeFont: UIFont = UIFont(name: veryLargeFontName, size: veryLargeFontSize)!
+    
     
 
 //    Date label
-    struct dateLabelTypograpgy {
+    struct dateLabelTypography {
         
         var paragraphStyle = NSMutableParagraphStyle()
         
@@ -58,6 +64,43 @@ class Typography: NSObject {
         
     }
     
-    //    Location label
+    // Location label
+    struct locationLabelTypography {
+        
+        var paragraphStyle = NSMutableParagraphStyle()
+        
+        let attributes: [String: AnyObject] = [NSFontAttributeName: mediumFont, NSForegroundColorAttributeName: GeneralStylesheet.Colours().font]
+        
+        func string(_ string: String) -> NSAttributedString {
+            
+            paragraphStyle.alignment = NSTextAlignment.center
+            
+            let nsString = string as NSString
+            
+            let attributedString = NSMutableAttributedString(string: string.uppercased(), attributes: attributes)
+            
+            attributedString.addAttribute(NSParagraphStyleAttributeName, value: paragraphStyle, range: nsString.range(of: string))
+            
+            return attributedString
+            
+        }
+        
+    }
+    
+    
+    // Current Temperature label
+    struct currentTemperatureLabelTypography {
+        
+        let attributes: [String: AnyObject] = [NSFontAttributeName: veryLargeFont, NSForegroundColorAttributeName: GeneralStylesheet.Colours().font]
+        
+        func string(_ string: String) -> NSAttributedString {
+            
+            let attributedString = NSMutableAttributedString(string: string.uppercased(), attributes: attributes)
+            
+            return attributedString
+            
+        }
+        
+    }
 
 }

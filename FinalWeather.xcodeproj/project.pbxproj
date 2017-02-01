@@ -14,6 +14,7 @@
 		255219EB1E411BBB00E3EE9C /* GeneralStylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255219E71E411BBB00E3EE9C /* GeneralStylesheet.swift */; };
 		255219EC1E411BBB00E3EE9C /* HomeStylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255219E81E411BBB00E3EE9C /* HomeStylesheet.swift */; };
 		255219ED1E411BBB00E3EE9C /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255219EA1E411BBB00E3EE9C /* Typography.swift */; };
+		25F978FB1E4142010072C7C3 /* SSASwiftReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25F978FA1E4142010072C7C3 /* SSASwiftReachability.swift */; };
 		E4A0DB5C4258BBD0A208625B /* Pods_FinalWeather.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2A3E01DB600E9FD0136DFBE /* Pods_FinalWeather.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 		255219E71E411BBB00E3EE9C /* GeneralStylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneralStylesheet.swift; sourceTree = "<group>"; };
 		255219E81E411BBB00E3EE9C /* HomeStylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeStylesheet.swift; sourceTree = "<group>"; };
 		255219EA1E411BBB00E3EE9C /* Typography.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		25F978FA1E4142010072C7C3 /* SSASwiftReachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SSASwiftReachability.swift; sourceTree = "<group>"; };
 		B2A3E01DB600E9FD0136DFBE /* Pods_FinalWeather.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FinalWeather.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC3690EC43011E3A71243E78 /* Pods-FinalWeather.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FinalWeather.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FinalWeather/Pods-FinalWeather.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -77,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				255219CE1E411A3700E3EE9C /* AppDelegate.swift */,
+				25F978FA1E4142010072C7C3 /* SSASwiftReachability.swift */,
 			);
 			name = Core;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 				255219CF1E411A3700E3EE9C /* AppDelegate.swift in Sources */,
 				255219E51E411B4E00E3EE9C /* MainViewController.swift in Sources */,
 				255219EC1E411BBB00E3EE9C /* HomeStylesheet.swift in Sources */,
+				25F978FB1E4142010072C7C3 /* SSASwiftReachability.swift in Sources */,
 				255219EB1E411BBB00E3EE9C /* GeneralStylesheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

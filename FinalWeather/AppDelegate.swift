@@ -7,14 +7,39 @@
 //
 
 import UIKit
+import SwiftyBeaver
+
+// SwiftyBeaver
+let log = SwiftyBeaver.self
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    
+    // Better logging
+    var enableLogs         = true
+    let logLevel           = SwiftyBeaver.Level.debug
+    
+    
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
+
+        
+        // START LOGGING
+        // --------------------------------------
+        // Better logs
+        // add log destinations. at least one is needed!
+        if self.enableLogs {
+            
+            let console      = ConsoleDestination()
+            console.minLevel = self.logLevel
+            log.addDestination(console)
+            
+        }
+        
         
         // Set the main view controller for the app
         // This will be the MainViewController
