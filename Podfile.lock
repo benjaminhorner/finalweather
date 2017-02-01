@@ -4,6 +4,7 @@ PODS:
   - SnapKit (3.1.2)
   - SwiftyBeaver (1.1.1)
   - SwiftyJSON (3.1.4)
+  - SwiftyUserDefaults (3.0.0)
 
 DEPENDENCIES:
   - Alamofire
@@ -11,6 +12,7 @@ DEPENDENCIES:
   - SnapKit (~> 3.1.2)
   - SwiftyBeaver
   - SwiftyJSON
+  - SwiftyUserDefaults
 
 SPEC CHECKSUMS:
   Alamofire: aa2e09d871c9160ac53c90e83c68064a94e3dfbe
@@ -18,7 +20,8 @@ SPEC CHECKSUMS:
   SnapKit: 12b24f569cb7c143acc9c22b9d91b23e7b1c84a2
   SwiftyBeaver: 2b68694df862381235e32bcfc4ec991e26bf131d
   SwiftyJSON: c2842d878f95482ffceec5709abc3d05680c0220
+  SwiftyUserDefaults: 0f1d45fc3aafb9064dac661e367f8f83fe21a4b4
 
-PODFILE CHECKSUM: 981f98759cc6e1cb019f5dbfbdc2881049774070
+PODFILE CHECKSUM: a8c977349fc62191d0576779407f0ffb96646822
 
 COCOAPODS: 1.1.1
