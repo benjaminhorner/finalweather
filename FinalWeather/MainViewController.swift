@@ -22,6 +22,11 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     // If this hasn't already been done
     // When the network is reachable
     var hasUpdatedData: Bool = false
+    
+    
+    // Data sources
+    var hourlyForecast: [WeatherModel] = []
+    var weeklyForecast: [WeatherModel] = []
 
     
     // UI elements
@@ -69,6 +74,11 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             setCurrentWeatherData(nil)
         }
         
+        
+        // Fetch the hourly and weekly forecast
+        getHourlyForecastData()
+        getWeeklyForecastData()
+        
     }
     
     
@@ -81,17 +91,40 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        
+        // if the section is the hourly forecast section
+        // count the hourly forecast array data
+        if section == 0 {
+            return hourlyForecast.count
+        }
+        // Else it is the weekly forecast
+        // so return the weekly forecast array count
+        else {
+            return weeklyForecast.count
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        var data: WeatherModel!
+        
+        // If the section is the hourly forecast
+        // Get data from that array
+        if indexPath.section == 0 {
+            data = hourlyForecast[indexPath.row]
+        }
+        // Get the data from the weekly forecast array
+        else {
+            data = weeklyForecast[indexPath.row]
+        }
+        
         if let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier) {
-            return setCellUI(cell)
+            return setCellUI(cell, data: data, section: indexPath.section)
         }
         else {
             let cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
-            return setCellUI(cell)
+            return setCellUI(cell, data: data, section: indexPath.section)
         }
         
         
@@ -284,12 +317,52 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     // Set Cell UI
-    fileprivate func setCellUI(_ cell: UITableViewCell) -> UITableViewCell {
+    fileprivate func setCellUI(_ cell: UITableViewCell, data: WeatherModel, section: Int) -> UITableViewCell {
         
         cell.backgroundColor = HomeStylesheet.TodayComponent.TableView.Cells().backgroundColour
         cell.selectionStyle = .none
-        cell.textLabel?.textColor = UIColor.blue
-        cell.detailTextLabel?.textColor = UIColor.orange
+        
+        if let date = data.date {
+            
+            var string = FWDate.stringDayFromDate(date)
+            
+            if section == 0 {
+                string = FWDate.stringHourFromDate(date)
+            }
+            
+            if let str = string {
+                cell.textLabel?.attributedText = Typography.dateLabelTypography().string(str)
+            }
+            
+        }
+        
+        if section == 0 {
+            if let temp = data.temperature {
+                let tempString = tempToString(temp)
+                cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(tempString)°")
+            }
+        }
+        else {
+            if let minTemp = data.tempMin {
+                
+                if let maxTemp = data.tempMax {
+                    let minTempString = tempToString(minTemp)
+                    let maxTempString = tempToString(maxTemp)
+                    cell.detailTextLabel?.attributedText = Typography.dateLabelTypography().string("\(maxTempString)°/\(minTempString)°")
+
+                }
+                
+            }
+        }
+        
+        
+        if let icon = data.icon {
+            cell.imageView?.image = UIImage(named: icon)
+            cell.imageView?.contentMode = .scaleAspectFit
+            cell.imageView?.image? = (currentWeatherIcon.image?.withRenderingMode(.alwaysTemplate))!
+            cell.imageView?.tintColor = GeneralStylesheet.Colours().iconColour
+        }
+        
         
         return cell
         
@@ -351,6 +424,43 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     
+    fileprivate func getHourlyForecastData() {
+        
+        API.getHourlyForecast { (models, success) in
+            if success {
+                
+                log.info("Retrieved data for hourly forecast")
+                
+                self.hourlyForecast = models
+                self.tableView.reloadSections(IndexSet(integer: 0), with: UITableViewRowAnimation.none)
+                
+            }
+            else {
+                log.error("Failed to retrieve data for hourly forecast")
+            }
+        }
+        
+    }
+    
+    
+    fileprivate func getWeeklyForecastData() {
+        
+        API.getWeeklyForecast { (models, success) in
+            if success {
+                log.info("Retrieved data for weekly forecast")
+                
+                self.weeklyForecast = models
+                self.tableView.reloadSections(IndexSet(integer: 1), with: UITableViewRowAnimation.none)
+                
+            }
+            else {
+                log.error("Failed to retrieve data for weekly forecast")
+            }
+        }
+        
+    }
+    
+    
     fileprivate func setCurrentWeatherData(_ model: WeatherModel?) {
         
        
@@ -376,14 +486,14 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             currentWindLabel.attributedText = Typography.dateLabelTypography().string("\(String(speed))km/h")
         }
         else {
-            currentWindLabel.attributedText = Typography.dateLabelTypography().string("- km/h")
+            currentWindLabel.attributedText = Typography.dateLabelTypography().string("0km/h")
         }
         
         if let humidity = model?.humidity {
             currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("\(String(humidity))%")
         }
         else {
-            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("- %")
+            currentHumidityLabel.attributedText = Typography.dateLabelTypography().string("0%")
         }
         
         if let temperature = model?.temperature {
@@ -406,7 +516,7 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
             }
         }
         else {
-            minMaxTemperature.attributedText = Typography.dateLabelTypography().string("- °/- °")
+            minMaxTemperature.attributedText = Typography.dateLabelTypography().string("0°/0°")
         }
             
             

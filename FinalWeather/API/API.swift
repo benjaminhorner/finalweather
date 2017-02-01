@@ -18,6 +18,7 @@ class API: NSObject {
     static let sessionManager = Alamofire.SessionManager(configuration: API.configuration)
     
 
+    // MARK: Get Current Weather
     class func getCurrentWeather( completionHandler: @escaping ((_ response: WeatherModel?, _ success: Bool) -> Void)) {
         
         let URLString  = FWURL.weatherURL()
@@ -35,7 +36,7 @@ class API: NSObject {
             case .success(let data):
                 let json = JSON(data)
                 
-                log.debug("JSON response: \(json)")
+                log.debug("weatherURL JSON response: \(json)")
                 
                 let model = API.mapCurrentWeatherJSON(json)
                 
@@ -63,20 +64,11 @@ class API: NSObject {
 
     
     
-    class func mapCurrentWeatherJSON(_ json: SwiftyJSON.JSON) -> WeatherModel? {
+    class func mapWeatherJSON(index: Int, list: [SwiftyJSON.JSON]) -> WeatherModel? {
         
         var model: WeatherModel?
         
-        
-        // Guard against empty data
-        guard let list = json["list"].array
-            else {
-                log.warning("json[\"list\"] is not a dictionary")
-                return nil
-        }
-        
-        
-        guard let main = list[0]["main"].dictionary
+        guard let main = list[index]["main"].dictionary
             else {
                 log.warning("json[\"main\"] is not a dictionary")
                 return nil
@@ -107,7 +99,7 @@ class API: NSObject {
         }
         
         
-        if let weatherArray = list[0]["weather"].array {
+        if let weatherArray = list[index]["weather"].array {
             
             if let weatherDic = weatherArray[0].dictionary {
                 if let description = weatherDic["description"]?.string {
@@ -122,7 +114,7 @@ class API: NSObject {
         }
         
         
-        if let wind = list[0]["wind"].dictionary {
+        if let wind = list[index]["wind"].dictionary {
             
             if let speed = wind["speed"]?.float {
                 weather.windSpeed = speed
@@ -130,80 +122,159 @@ class API: NSObject {
             
         }
         
-        if let name = list[0]["name"].string {
+        if let name = list[index]["name"].string {
             weather.location = name
         }
         
-        if let dt = list[0]["dt"].int {
+        if let dt = list[index]["dt"].int {
             weather.date = FWDate.timesTampToDate(dt)
         }
-        
+
         return model
         
     }
     
     
+    class func mapCurrentWeatherJSON(_ json: SwiftyJSON.JSON) -> WeatherModel? {
+        
+        
+        // Guard against empty data
+        guard let list = json["list"].array
+            else {
+                log.warning("json[\"list\"] is not a dictionary")
+                return nil
+        }
+        
+        return API.mapWeatherJSON(index: 0, list: list)
+        
+    }
     
-    /*
-     
-     "cod" : "200",
-     "message" : "accurate",
-     "count" : 1,
-     "list" : [
-     {
-     "main" : {
-     "temp" : 14.74,
-     "pressure" : 1015,
-     "temp_max" : 16,
-     "humidity" : 62,
-     "temp_min" : 13
-     },
-     "dt" : 1485952200,
-     "id" : 2996944,
-     "name" : "Lyon",
-     "weather" : [
-     {
-     "id" : 800,
-     "description" : "Sky is Clear",
-     "main" : "Clear",
-     "icon" : "01d"
-     }
-     ],
-     "clouds" : {
-     "all" : 0
-     },
-     "coord" : {
-     "lon" : 4.84671,
-     "lat" : 45.748459
-     },
-     "wind" : {
-     "deg" : 180,
-     "speed" : 8.699999999999999
-     },
-     "sys" : {
-     "country" : "FR"
-     }
-     }
-     
-     */
     
-//    class func processHomeFeedJSON(_ json: SwiftyJSON.JSON) -> [QandaModel] {
-//        
-//        var models: [QandaModel] = []
-//        
-//        if let array = json.array {
-//            for model in array {
-//                
-//                let qandaModel = generateQanda(model)
-//                if let m = qandaModel {
-//                    models.append(m)
-//                }
-//                
-//            }
-//        }
-//        
-//        return models
-//        
-//    }
+    
+    // MARK: Get Hourly Forecast
+    class func getHourlyForecast( completionHandler: @escaping ((_ response: [WeatherModel], _ success: Bool) -> Void)) {
+        
+        let URLString  = FWURL.hourlyForecastURL()
+        
+        
+        let headers    = [
+            "Accept"        : "application/json",
+            "Content-Type"  : "application/json",
+            "Connection"    : "close"
+        ]
+        
+        sessionManager.request(URLString, method: .get, parameters: nil,  headers: headers).validate().responseJSON { (response) in
+            switch response.result {
+                
+            case .success(let data):
+                let json = JSON(data)
+                
+                log.debug("hourlyForecastURL JSON response: \(json)")
+                
+                let models = API.mapHourlyForecastJSON(json)
+                
+                completionHandler(models, true)
+                
+            case .failure(let error):
+                
+                completionHandler([], false)
+                
+                log.error("Request failed with error: \(error)")
+                log.error("URL used: \(URLString)")
+                log.error("HEADERS used: \(headers)")
+                
+            }
+        }
+        
+    }
+    
+    
+    
+    class func mapHourlyForecastJSON(_ json: SwiftyJSON.JSON) -> [WeatherModel] {
+        
+        var models: [WeatherModel] = []
+        
+        
+        // Guard against empty data
+        guard let list = json["list"].array
+            else {
+                log.warning("json[\"list\"] is not a dictionary")
+                return []
+        }
+        
+        // loop through the list
+        // And add the models to the models array
+        for index in 0..<list.count {
+            if let model = API.mapWeatherJSON(index: index, list: list) {
+                models.append(model)
+            }
+        }
+        
+        return models
+        
+    }
+
+    
+    
+    // MARK: Get Hourly Forecast
+    class func getWeeklyForecast( completionHandler: @escaping ((_ response: [WeatherModel], _ success: Bool) -> Void)) {
+        
+        let URLString  = FWURL.forecastURL()
+        
+        
+        let headers    = [
+            "Accept"        : "application/json",
+            "Content-Type"  : "application/json",
+            "Connection"    : "close"
+        ]
+        
+        sessionManager.request(URLString, method: .get, parameters: nil,  headers: headers).validate().responseJSON { (response) in
+            switch response.result {
+                
+            case .success(let data):
+                let json = JSON(data)
+                
+                log.debug("forecastURL JSON response: \(json)")
+                
+                let models = API.mapWeeklyForecastJSON(json)
+                
+                completionHandler(models, true)
+                
+            case .failure(let error):
+                
+                completionHandler([], false)
+                
+                log.error("Request failed with error: \(error)")
+                log.error("URL used: \(URLString)")
+                log.error("HEADERS used: \(headers)")
+                
+            }
+        }
+        
+    }
+    
+    class func mapWeeklyForecastJSON(_ json: SwiftyJSON.JSON) -> [WeatherModel] {
+        
+        var models: [WeatherModel] = []
+        
+        
+        // Guard against empty data
+        guard let list = json["list"].array
+            else {
+                log.warning("json[\"list\"] is not a dictionary")
+                return []
+        }
+        
+        // loop through the list
+        // And add the models to the models array
+        for index in 0..<list.count {
+            if let model = API.mapWeatherJSON(index: index, list: list) {
+                models.append(model)
+            }
+        }
+        
+        return models
+        
+    }
 
 }
