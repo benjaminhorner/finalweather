@@ -9,6 +9,8 @@
 import UIKit
 import SwiftyBeaver
 import SwiftyUserDefaults
+import Fabric
+import Crashlytics
 
 
 // SwiftyBeaver
@@ -24,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
     // Better logging
-    var enableLogs         = true
+    var enableLogs         = false
     let logLevel           = SwiftyBeaver.Level.debug
     
     
@@ -46,6 +48,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             log.addDestination(console)
             
         }
+        
+        
+        // Add Fabric
+        Fabric.with([Crashlytics.self])
         
         
         // Set the main view controller for the app
