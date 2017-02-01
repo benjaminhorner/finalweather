@@ -17,10 +17,11 @@ class GeneralStylesheet: NSObject {
     
     struct Colours {
         
-        let background = UIColor(red:0.98, green:0.98, blue:0.98, alpha:1.0)
-        let font = UIColor(red:0.22, green:0.27, blue:0.35, alpha:1.0)
+        let background = UIColor.black
+        let font = UIColor.white
         let tableViewBackground  = UIColor.clear
-        let tableViewSeparators =  UIColor(red:0.22, green:0.27, blue:0.35, alpha:1.0)
+        let tableViewSeparators =  UIColor.white.withAlphaComponent(0.3)
+        let iconColour = UIColor.white
         
     }
 
