@@ -18,4 +18,7 @@ target 'FinalWeather' do
     # Test flight
     pod 'Fabric'
 
+    # Cache
+    pod 'SwiftyUserDefaults'
+
 end
